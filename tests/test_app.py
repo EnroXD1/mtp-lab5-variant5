@@ -55,6 +55,45 @@ class ApplicationTests(unittest.TestCase):
         self.app.greet_button.invoke()
         self.assertEqual(self.app.greeting_var.get(), "Привет!")
 
+    def test_conversion_button_updates_result(self):
+        self.app.convert_button.invoke()
+        self.assertEqual(self.app.result_var.get(), "100 USD = 9000.00 RUB")
+        self.assertEqual(self.app.error_var.get(), "")
+
+    def test_currency_lists_are_readonly(self):
+        for widget in (self.app.source_box, self.app.target_box):
+            self.assertEqual(str(widget.cget("state")), "readonly")
+            self.assertEqual(
+                tuple(widget.cget("values")), ("RUB", "USD", "EUR"),
+            )
+
+    def test_error_clears_previous_result(self):
+        self.app.convert_button.invoke()
+        self.app.amount_var.set("-5")
+        self.app.convert_button.invoke()
+        self.assertEqual(self.app.result_var.get(), "")
+        self.assertIn("Введите сумму", self.app.error_var.get())
+
+    def test_valid_input_clears_error(self):
+        self.app.amount_var.set("abc")
+        self.app.convert_button.invoke()
+        self.app.amount_var.set("1,50")
+        self.app.convert_button.invoke()
+        self.assertEqual(self.app.result_var.get(), "1,50 USD = 135.00 RUB")
+        self.assertEqual(self.app.error_var.get(), "")
+
+    def test_editing_each_input_clears_stale_result(self):
+        for variable, value in (
+            (self.app.amount_var, "200"),
+            (self.app.source_var, "EUR"),
+            (self.app.target_var, "USD"),
+        ):
+            with self.subTest(value=value):
+                self.app.convert_button.invoke()
+                self.assertTrue(self.app.result_var.get())
+                variable.set(value)
+                self.assertEqual(self.app.result_var.get(), "")
+
 
 if __name__ == "__main__":
     unittest.main()
