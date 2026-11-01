@@ -45,6 +45,16 @@ class ApplicationTests(unittest.TestCase):
         self.app.file_menu.invoke(0)
         self.assertEqual(self.app.tk.call("info", "commands", "."), "")
 
+    def test_greeting_button_updates_label(self):
+        self.app.name_var.set("  Илья  ")
+        self.app.greet_button.invoke()
+        self.assertEqual(self.app.greeting_var.get(), "Привет, Илья!")
+
+    def test_empty_name_gives_general_greeting(self):
+        self.app.name_var.set("  ")
+        self.app.greet_button.invoke()
+        self.assertEqual(self.app.greeting_var.get(), "Привет!")
+
 
 if __name__ == "__main__":
     unittest.main()

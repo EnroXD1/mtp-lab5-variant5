@@ -28,6 +28,7 @@ class ConverterApp(tk.Tk):
         self.notebook.add(self.greeting_tab, text="Приветствие")
         self.notebook.add(self.converter_tab, text="Конвертер")
         self.notebook.enable_traversal()
+        self._build_greeting()
 
     def _build_menu(self) -> None:
         menu = tk.Menu(self)
@@ -35,3 +36,28 @@ class ConverterApp(tk.Tk):
         self.file_menu.add_command(label="Exit", command=self.destroy)
         menu.add_cascade(label="File", menu=self.file_menu, underline=0)
         self.configure(menu=menu)
+
+    def _build_greeting(self) -> None:
+        self.name_var = tk.StringVar(value="Илья")
+        self.greeting_var = tk.StringVar(value="Нажмите кнопку «Привет».")
+        ttk.Label(self.greeting_tab, text="Ваше имя:").pack(anchor="w")
+        self.name_entry = ttk.Entry(
+            self.greeting_tab, textvariable=self.name_var, width=32,
+        )
+        self.name_entry.pack(anchor="w", pady=(6, 14))
+        self.name_entry.bind("<Return>", self.greet)
+        self.greet_button = ttk.Button(
+            self.greeting_tab, text="Привет", command=self.greet,
+        )
+        self.greet_button.pack(anchor="w")
+        ttk.Label(
+            self.greeting_tab,
+            textvariable=self.greeting_var,
+            font=("Segoe UI", 14),
+            wraplength=540,
+        ).pack(anchor="w", pady=24)
+
+    def greet(self, _event: tk.Event | None = None) -> None:
+        """Обновить приветствие по нажатию кнопки или Enter."""
+        name = self.name_var.get().strip()
+        self.greeting_var.set(f"Привет, {name}!" if name else "Привет!")
