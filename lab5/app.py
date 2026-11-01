@@ -3,7 +3,7 @@
 import tkinter as tk
 from tkinter import ttk
 
-from lab5.currency import CURRENCIES, convert_currency
+from lab5.currency import CURRENCIES, RATES_RUB, convert_currency
 
 
 class ConverterApp(tk.Tk):
@@ -14,6 +14,7 @@ class ConverterApp(tk.Tk):
         self.title("МТП - лабораторная №5")
         self.geometry("760x540")
         self.minsize(700, 500)
+        self.rates_window: tk.Toplevel | None = None
         self._build_menu()
 
         ttk.Label(
@@ -98,6 +99,10 @@ class ConverterApp(tk.Tk):
             frame, text="Перевести", command=self.calculate,
         )
         self.convert_button.grid(row=3, column=0, sticky="w", pady=18)
+        self.rates_button = ttk.Button(
+            frame, text="Показать курсы", command=self.show_rates,
+        )
+        self.rates_button.grid(row=3, column=1, columnspan=2, sticky="w")
         ttk.Label(
             frame, textvariable=self.result_var,
             font=("Segoe UI", 14, "bold"), wraplength=560,
@@ -131,3 +136,43 @@ class ConverterApp(tk.Tk):
             return
         amount = self.amount_var.get().strip()
         self.result_var.set(f"{amount} {source} = {result:.2f} {target}")
+
+    def show_rates(self) -> None:
+        """Открыть дополнительное окно или поднять уже существующее."""
+        if self.rates_window is not None and self.rates_window.winfo_exists():
+            self.rates_window.lift()
+            self.rates_window.focus_set()
+            return
+
+        window = tk.Toplevel(self)
+        self.rates_window = window
+        window.title("Учебные курсы")
+        window.transient(self)
+        window.resizable(False, False)
+        window.geometry(
+            f"+{self.winfo_rootx() + 100}+{self.winfo_rooty() + 100}",
+        )
+        window.protocol("WM_DELETE_WINDOW", self.close_rates)
+        frame = ttk.Frame(window, padding=24)
+        frame.pack(fill="both", expand=True)
+        ttk.Label(
+            frame, text="Фиксированные учебные курсы",
+            font=("Segoe UI", 12, "bold"),
+        ).pack(anchor="w", pady=(0, 12))
+        for code, rate in RATES_RUB.items():
+            ttk.Label(frame, text=f"1 {code} = {rate:f} RUB").pack(
+                anchor="w", pady=3,
+            )
+        ttk.Label(
+            frame, text="Это примеры для расчётов, а не текущие курсы.",
+            wraplength=320,
+        ).pack(anchor="w", pady=14)
+        ttk.Button(frame, text="Закрыть", command=self.close_rates).pack(
+            anchor="e",
+        )
+
+    def close_rates(self) -> None:
+        """Закрыть только окно курсов, сохранив главное окно."""
+        if self.rates_window is not None and self.rates_window.winfo_exists():
+            self.rates_window.destroy()
+        self.rates_window = None

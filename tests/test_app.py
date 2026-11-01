@@ -94,6 +94,45 @@ class ApplicationTests(unittest.TestCase):
                 variable.set(value)
                 self.assertEqual(self.app.result_var.get(), "")
 
+    def test_rates_button_opens_second_window(self):
+        self.app.rates_button.invoke()
+        window = self.app.rates_window
+        self.assertIsInstance(window, tk.Toplevel)
+        self.assertEqual(window.title(), "Учебные курсы")
+        self.assertEqual(str(window.master), str(self.app))
+
+    def test_repeated_open_reuses_rates_window(self):
+        self.app.show_rates()
+        first = self.app.rates_window
+        self.app.show_rates()
+        self.assertIs(self.app.rates_window, first)
+
+    def test_rates_window_can_be_closed_and_reopened(self):
+        self.app.show_rates()
+        first = self.app.rates_window
+        self.app.close_rates()
+        self.assertFalse(first.winfo_exists())
+        self.assertIsNone(self.app.rates_window)
+        self.assertTrue(self.app.winfo_exists())
+        self.app.show_rates()
+        self.assertIsNot(self.app.rates_window, first)
+
+    def test_window_manager_close_uses_same_handler(self):
+        self.app.show_rates()
+        window = self.app.rates_window
+        command = window.protocol("WM_DELETE_WINDOW")
+        window.tk.call(command)
+        self.assertFalse(window.winfo_exists())
+        self.assertIsNone(self.app.rates_window)
+
+    def test_exit_also_closes_child_window(self):
+        self.app.show_rates()
+        window_path = str(self.app.rates_window)
+        self.app.file_menu.invoke(0)
+        self.assertEqual(
+            self.app.tk.call("info", "commands", window_path), "",
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
