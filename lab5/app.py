@@ -12,6 +12,7 @@ class ConverterApp(tk.Tk):
         self.title("МТП - лабораторная №5")
         self.geometry("720x480")
         self.minsize(640, 420)
+        self._build_menu()
 
         ttk.Label(
             self, text="Практика Tkinter", font=("Segoe UI", 17, "bold"),
@@ -27,3 +28,10 @@ class ConverterApp(tk.Tk):
         self.notebook.add(self.greeting_tab, text="Приветствие")
         self.notebook.add(self.converter_tab, text="Конвертер")
         self.notebook.enable_traversal()
+
+    def _build_menu(self) -> None:
+        menu = tk.Menu(self)
+        self.file_menu = tk.Menu(menu, tearoff=False)
+        self.file_menu.add_command(label="Exit", command=self.destroy)
+        menu.add_cascade(label="File", menu=self.file_menu, underline=0)
+        self.configure(menu=menu)

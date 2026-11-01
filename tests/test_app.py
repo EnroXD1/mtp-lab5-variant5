@@ -36,6 +36,15 @@ class ApplicationTests(unittest.TestCase):
             self.app.notebook.select(), str(self.app.greeting_tab),
         )
 
+    def test_file_menu_contains_exit(self):
+        menu = self.app.nametowidget(self.app.cget("menu"))
+        self.assertEqual(menu.entrycget(1, "label"), "File")
+        self.assertEqual(self.app.file_menu.entrycget(0, "label"), "Exit")
+
+    def test_exit_menu_destroys_main_window(self):
+        self.app.file_menu.invoke(0)
+        self.assertEqual(self.app.tk.call("info", "commands", "."), "")
+
 
 if __name__ == "__main__":
     unittest.main()
